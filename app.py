@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request, session, flash
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy 
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 
@@ -15,6 +16,39 @@ db = SQLAlchemy(app)
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/register")
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if not username:
+            flash("Must provide a username")
+            return render_template("register.html")
+        if not password:
+            flash("Must provide password")
+            return render_template("register.html")
+        if not request.form.get("confirmation"):
+            flash("Must enter confirmation password")
+            return render_template("register.html")
+        if password != request.form.get("confirmation"):
+            flash("Passwords do not match")
+            return render_template("register.html")
+        
+        hash = generate_password_hash(password)
+        user = users(username=username, password=hash)
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            flash("Username already exists")
+            return render_template("register.html")
+        
+        return render_template("login.html")
+
+    else:
+        return render_template("register.html")
+
 
 @app.route("/saved")
 def saved():
@@ -30,7 +64,7 @@ def listen_later():
 
 class users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, nullable=False)
+    username = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False) # The hash of the password will be stored, not the text
 
 class albums(db.Model):
@@ -38,6 +72,7 @@ class albums(db.Model):
     artist = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=False)
+    rating = db.Column(db.Float, nullable=True)
     # This creates a link (a foreign key) back to the User who saved this album.
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
