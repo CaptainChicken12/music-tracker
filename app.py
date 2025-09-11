@@ -37,6 +37,7 @@ class albums(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     artist = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
+    year = db.Column(db.String, nullable=False)
     # This creates a link (a foreign key) back to the User who saved this album.
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
