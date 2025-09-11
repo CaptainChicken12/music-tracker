@@ -17,7 +17,7 @@ db = SQLAlchemy(app)
 def index():
     return render_template("index.html")
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
@@ -25,13 +25,13 @@ def register():
         if not username:
             flash("Must provide a username")
             return render_template("register.html")
-        if not password:
+        elif not password:
             flash("Must provide password")
             return render_template("register.html")
-        if not request.form.get("confirmation"):
+        elif not request.form.get("confirmation"):
             flash("Must enter confirmation password")
             return render_template("register.html")
-        if password != request.form.get("confirmation"):
+        elif password != request.form.get("confirmation"):
             flash("Passwords do not match")
             return render_template("register.html")
         
@@ -40,7 +40,7 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-        except IntegrityError:
+        except IntegrityError: # username column is unique so IntegrityError occurs if username already exists
             flash("Username already exists")
             return render_template("register.html")
         
@@ -48,7 +48,29 @@ def register():
 
     else:
         return render_template("register.html")
-
+    
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if not username:
+            flash("Must provide username")
+            return render_template("login.html")
+        elif not password:
+            flash("Must provide password")
+            return render_template("login.html")
+        
+        user = db.session.query(users).filter_by(name=username).first()
+        if user is None or not check_password_hash(user.password, password): # checking for correct username and password
+            flash("Invalid username or password")
+            return render_template("login.html")
+        
+        session["user_id"] = user.id # storing the user id in session so we can remember who is currently logged in
+        return render_template("index.html")
+        
+    else:
+        return render_template("login.html")
 
 @app.route("/saved")
 def saved():
