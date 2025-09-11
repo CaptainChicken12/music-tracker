@@ -3,6 +3,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy 
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -13,7 +14,16 @@ Session(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///music_app.db"
 db = SQLAlchemy(app)
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:   # no user logged in
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
@@ -48,7 +58,7 @@ def register():
 
     else:
         return render_template("register.html")
-    
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -72,15 +82,23 @@ def login():
     else:
         return render_template("login.html")
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("login.html")
+
 @app.route("/saved")
+@login_required
 def saved():
     return render_template("saved.html")
 
 @app.route("/search")
+@login_required
 def search():
-    return render_template("search.hmtl")
+    return render_template("search.html")
 
 @app.route("/listen_later")
+@login_required
 def listen_later():
     return render_template("listen_later.html")
 
