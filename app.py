@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
+import json
+import requests
 
 app = Flask(__name__)
 
@@ -30,9 +32,9 @@ def index():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username")
+        username1 = request.form.get("username")
         password = request.form.get("password")
-        if not username:
+        if not username1:
             flash("Must provide a username")
             return render_template("register.html")
         elif not password:
@@ -46,7 +48,7 @@ def register():
             return render_template("register.html")
         
         hash = generate_password_hash(password)
-        user = users(username=username, password=hash)
+        user = users(username=username1, password=hash)
         try:
             db.session.add(user)
             db.session.commit()
@@ -71,7 +73,7 @@ def login():
             flash("Must provide password")
             return render_template("login.html")
         
-        user = db.session.query(users).filter_by(name=username).first()
+        user = db.session.query(users).filter_by(username=username).first()
         if user is None or not check_password_hash(user.password, password): # checking for correct username and password
             flash("Invalid username or password")
             return render_template("login.html")
@@ -92,9 +94,19 @@ def logout():
 def saved():
     return render_template("saved.html")
 
-@app.route("/search")
+@app.route("/search", methods=["POST", "GET"])
 @login_required
 def search():
+    albums = []
+    if request.method == "POST":
+        query = request.form.get("album")
+        response = requests.get(f"https://musicbrainz.org/ws/2/release/?query={query}&fmt=json")
+        if response.status_code == 200:
+            data = response.json()
+            
+            for release in data:
+                title = release.get("title", "N/A")
+                artist = release.get("artist-credit", [{}])[0].get("artist", {}).get("name", "Unknown")
     return render_template("search.html")
 
 @app.route("/listen_later")
@@ -113,6 +125,7 @@ class albums(db.Model):
     title = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=False)
     rating = db.Column(db.Float, nullable=True)
+    listen_later = db.Column(db.Boolean, default=False)
     # This creates a link (a foreign key) back to the User who saved this album.
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 

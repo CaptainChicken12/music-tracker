@@ -3,6 +3,23 @@
         <title>music-tracker</title>
     </head>
     <body>
+        
+        {% if session.get("user_id") %}
+        <ul>
+            <li><a href="/search">Search</a></li>
+            <li><a href="/saved">Library</a></li>
+            <li><a href="/listen_later">Listen Later</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/logout">Log out</a></li>
+        </ul>
+        {% else %}
+            <ul>
+                <li><a href="/login">Log in</a></li>
+                <li><a href="/register">Register</a></li>
+            </ul>
+        {% endif %}
+        
         {% block body %}{% endblock %}
     </body>
+    
 </html>
