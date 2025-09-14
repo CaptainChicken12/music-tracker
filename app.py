@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, session, flash
+from flask import Flask, render_template, redirect, request, session, flash, jsonify
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -92,22 +92,42 @@ def logout():
 @app.route("/saved")
 @login_required
 def saved():
-    return render_template("saved.html")
+    favAlbums = db.session.query(albums).filter_by(
+        user_id=session["user_id"]
+    ).all()
+
+    return render_template("saved.html", albums=favAlbums)
 
 @app.route("/search", methods=["POST", "GET"])
 @login_required
 def search():
     albums = []
     if request.method == "POST":
-        query = request.form.get("album")
-        response = requests.get(f"https://musicbrainz.org/ws/2/release/?query={query}&fmt=json")
+        query = request.json.get("title")
+        response = requests.get(f"https://musicbrainz.org/ws/2/release-group/?query={query}&fmt=json")
         if response.status_code == 200:
             data = response.json()
             
-            for release in data:
+            for release in data.get("release-groups", []):
                 title = release.get("title", "N/A")
                 artist = release.get("artist-credit", [{}])[0].get("artist", {}).get("name", "Unknown")
+                year = release.get("first-release-date", 'N/A')
+                albums.append({'title': title, 'artist': artist, 'year': year})
+
+        return jsonify(albums[:15])
     return render_template("search.html")
+
+@app.route("/action", methods=["POST", "GET"])
+@login_required
+def action():
+    data = request.get_json()
+    album_data = data.get("album")
+    album = albums(user_id=session["user_id"], artist=album_data["artist"], title=album_data["title"], year=album_data["year"])
+    db.session.add(album)
+    db.session.commit()
+    
+    return jsonify({"message": "album added to favorites!"})
+
 
 @app.route("/listen_later")
 @login_required
@@ -124,8 +144,8 @@ class albums(db.Model):
     artist = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
     year = db.Column(db.String, nullable=False)
-    rating = db.Column(db.Float, nullable=True)
-    listen_later = db.Column(db.Boolean, default=False)
+    #rating = db.Column(db.Float, nullable=True)
+    #listen_later = db.Column(db.Boolean, default=False)
     # This creates a link (a foreign key) back to the User who saved this album.
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
