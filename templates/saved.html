@@ -1,4 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h1>Album Library</h1>>
+    <h1>Album Library</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col"> Album Title</th>
+                <th scope="col"> Artist </th>
+                <th scope="col"> Date </th>
+        
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for album in albums %}
+                <tr>
+                    <td>{{ album.title }}</td>
+                    <td>{{ album.artist }}</td>
+                    <td>{{ album.year }}</td>
+
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
