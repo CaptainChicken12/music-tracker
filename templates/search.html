@@ -7,7 +7,7 @@
     
     <script>
         document.querySelector("#searchbar").addEventListener("keyup", async function(event) {
-            const query = event.target.value;
+            const query = event.target.value.toLowerCase();
             if (query.length === 0) {
                 resultList.innerHTML = "";
                 return;

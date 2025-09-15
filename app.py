@@ -87,7 +87,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("login.html")
+    return redirect("/")
 
 @app.route("/saved")
 @login_required
@@ -103,7 +103,7 @@ def saved():
 def search():
     albums = []
     if request.method == "POST":
-        query = request.json.get("title")
+        query = request.json.get("title", "").lower()
         response = requests.get(f"https://musicbrainz.org/ws/2/release-group/?query={query}&fmt=json")
         if response.status_code == 200:
             data = response.json()
@@ -114,7 +114,7 @@ def search():
                 year = release.get("first-release-date", 'N/A')
                 albums.append({'title': title, 'artist': artist, 'year': year})
 
-        return jsonify(albums[:15])
+        return jsonify(albums[:50])
     return render_template("search.html")
 
 @app.route("/action", methods=["POST", "GET"])
