@@ -5,12 +5,9 @@ div {
 }
 
 body {
-    background-color: white; /* or any color */
-    display: flex;
-    justify-content: center; /* horizontal centering */
-    align-items: center;     /* vertical centering */
-    min-height: 100vh;       /* full viewport height */
-    margin: 0;               /* remove default browser margin */
+    background-color: white;
+    margin: 0;
+    font-family: Arial, sans-serif;
 }
 
 form {
@@ -18,5 +15,58 @@ form {
     padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    width: 300px;
+    margin: 100px auto; /* centers form horizontally with margin */
 }
 
+.search-container {
+    position: relative;
+}
+
+#results {
+    position: absolute;
+    top: 35%; /* right below the input */
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-height: 500px;
+    overflow-y: scroll;
+    z-index: 1000;
+}
+
+#results li {
+    background: #f8f9fa;  /* light gray */
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#results li button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
+
+.search-page {
+    background-color: #f4f6f8;
+    min-height: 25vh;
+    padding: 40px 20px;
+    text-align: center; /* keeps text + input centered horizontally */
+}
+
+#album-head {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
