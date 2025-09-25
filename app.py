@@ -6,6 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from functools import wraps
 import json
 import requests
+from sqlalchemy import func
+
 
 app = Flask(__name__)
 
@@ -15,6 +17,7 @@ Session(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///music_app.db"
 db = SQLAlchemy(app)
+
 
 def login_required(f):
     @wraps(f)
@@ -27,7 +30,9 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html")
+    fav_artist = db.session.query(albums.artist, func.count(albums.artist).label('count')).filter_by(user_id=session["user_id"]
+    ).group_by(albums.artist).order_by(func.count(albums.artist).desc()).first()
+    return render_template("index.html", fav_artist=fav_artist)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
