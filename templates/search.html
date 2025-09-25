@@ -1,13 +1,18 @@
 {% extends "layout.html" %}
+{% block body_class %}search-page{% endblock %}
+
 {% block body %}
-    <h1>Search for your favorite albums</h1>
+    <h1 id="search-head">Search for your favorite albums</h1>
     
-    <input id='searchbar' name="album-name" autofocus type="text" placeholder="Enter album name">
-    <ul id="results"></ul>
+    <div class="search-containter">
+        <input id='searchbar' name="album-name" autofocus type="text" placeholder="Enter album name">
+        <ul id="results"></ul>
+    </div>
     
     <script>
         document.querySelector("#searchbar").addEventListener("keyup", async function(event) {
             const query = event.target.value.toLowerCase();
+            const resultList = document.querySelector("#results")
             if (query.length === 0) {
                 resultList.innerHTML = "";
                 return;
@@ -16,7 +21,7 @@
             headers: {"Content-Type": "application/json"}, body: JSON.stringify({ title: query})
             });
             const results = await response.json();
-            const resultList = document.querySelector("#results")
+            
             resultList.innerHTML = "";
 
             results.forEach(album => {
