@@ -1,0 +1,22 @@
+div {
+    width: 200px;
+    background-color: white;
+    
+}
+
+body {
+    background-color: white; /* or any color */
+    display: flex;
+    justify-content: center; /* horizontal centering */
+    align-items: center;     /* vertical centering */
+    min-height: 100vh;       /* full viewport height */
+    margin: 0;               /* remove default browser margin */
+}
+
+form {
+    background: rgb(15, 155, 183);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
