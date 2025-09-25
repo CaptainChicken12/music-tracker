@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
     <h1>Music Tracker</h1>
+    {% if fav_artist %}
+        <p>Your top artist: {{ fav_artist.artist }}, {{ fav_artist.count }} albums saved!</p>
+    {% else %}
+        <p>Start adding albums to see your favorite artist!</p>
+    {% endif %}
 {% endblock %}
