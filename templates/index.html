@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
     <h1>Music Tracker</h1>
+    <p>
+        Welcome to music tracker! Here you can search up your favorite albums and then save them to your library
+    </p>
     {% if fav_artist %}
         <p>Your top artist: {{ fav_artist.artist }}, {{ fav_artist.count }} albums saved!</p>
     {% else %}
